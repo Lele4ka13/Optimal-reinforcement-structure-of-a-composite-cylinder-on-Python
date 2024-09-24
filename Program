@@ -1,0 +1,397 @@
+# Импортируемые библиотеки
+import math
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+start = time.time()
+
+size = 7  # Шаг
+epsilon = 0.001  # Погрешность
+Pi = math.pi
+
+# Варьируемые количества пар слоев
+n_1 = np.linspace(1, 3, size).astype(int)
+n_2 = np.linspace(1, 1, size).astype(int)
+n_3 = np.linspace(1, 1, size).astype(int)
+n_4 = np.linspace(1, 2, size).astype(int)
+# Варьируемые углы пар слоев
+psi_1 = np.linspace(0, Pi / 2, size)
+psi_2 = np.linspace(0, Pi / 2, size)
+psi_3 = np.linspace(0, Pi / 2, size)
+psi_4 = np.linspace(0, Pi / 2, size)
+
+
+# Вводимые функции
+
+def c2(x):
+    p = math.cos(x) ** 2
+    return float(p)
+
+def s2(x):
+    p = math.sin(x) ** 2
+    return float(p)
+
+def non_lin_eq(x_1, x_2, x_3, x_4, phi_1, phi_2, phi_3, phi_4):
+    res = (x_1 * s2(phi_1) + x_2 * s2(phi_2) + x_3 * s2(phi_3) + x_4 * s2(phi_4)) / (x_1 * c2(phi_1) + x_2 * c2(phi_2) + x_3 * c2(phi_3) + x_4 * c2(phi_4)) - 2
+    return res
+
+def c(x):
+    p1 = math.cos(x)
+    return float(p1)
+
+def s(x):
+    p2 = math.sin(x)
+    return float(p2)
+
+def c2(x):
+    p3 = math.cos(x) ** 2
+    return float(p3)
+
+def c4(x):
+    p4 = math.cos(x) ** 4
+    return float(p4)
+
+
+def s2(x):
+    p5 = math.sin(x) ** 2
+    return float(p5)
+
+
+def s4(x):
+    p6 = math.sin(x) ** 4
+    return float(p6)
+
+def Ezz(x):
+    p7 = E110 * c4(x) + E220 * s4(x) + 2 * (E120 + 2 * E660) * s2(x) * c2(x)
+    return float(p7)
+
+def Eθθ(x):
+    p8 = E110 * s4(x) + E220 * c4(x) + 2 * (E120 + 2 * E660) * s2(x) * c2(x)
+    return float(p8)
+
+def Ezθ(x):
+    p9 = (E110 + E220 - 4 * E660) * s2(x) * c2(x) + E120 * (s4(x) + c4(x))
+    return float(p9)
+
+def E0(x):
+    p13 = np.array(
+        [[Ezz(x), Ezθ(x)], [Ezθ(x), Eθθ(x)]])
+    return p13
+
+def Szz(x):
+    p14 = S110 * c4(x) + S220 * s4(x) + (2 * S120 + S660) * s2(x) * c2(x)
+    return float(p14)
+
+def Szθ(x):
+    p15 = (S110 + S220 - S660) * s2(x) * c2(x) + S120 * (s4(x) + c4(x))
+    return float(p15)
+
+def Sθθ(x):
+    p17 = S110 * s4(x) + S220 * c4(x) + (2 * S120 + S660) * s2(x) * c2(x)
+    return float(p17)
+
+def S0(x):
+    p20 = np.array(
+        [[Szz(x), Szθ(x)], [Szθ(x), Sθθ(x)]])
+    return p20
+
+res = []
+for i_1 in range(1, size):
+    for i_2 in range(1, size):
+        for i_3 in range(1, size):
+            for i_4 in range(1, size):
+                for j_1 in range(1, size):
+                    for j_2 in range(1, size):
+                        for j_3 in range(1, size):
+                            for j_4 in range(1, size):
+                                if psi_1[j_1] != psi_2[j_2] and psi_1[j_1] != psi_3[j_3] and psi_1[j_1] != psi_3[j_4] and psi_1[j_2] != psi_3[j_3] and psi_1[j_2] != psi_3[j_4] and psi_1[j_3] != psi_3[j_4]:
+                                    result = []
+                                    if abs(non_lin_eq(n_1[i_1], n_2[i_2], n_3[i_3], n_4[i_4], psi_1[j_1], psi_2[j_2], psi_3[j_3], psi_4[j_4])) < epsilon:
+                                        result.append(n_1[i_1])
+                                        result.append(n_2[i_2])
+                                        result.append(n_3[i_3])
+                                        result.append(n_4[i_4])
+                                        result.append(psi_1[j_1])
+                                        result.append(psi_2[j_2])
+                                        result.append(psi_3[j_3])
+                                        result.append(psi_4[j_4])
+                                        res.append(result)
+
+
+itog = []
+KK = []
+
+for values in res:
+    # Начальные данные
+    E10 = 45000
+    E20 = 10000
+    G120 = 5000
+    nu120 = 0.3
+    p = 10
+    R = 150
+    σ45 = 300
+    σ0 = 1100
+    hi = 0.5
+
+    n1 = float(values[0])
+    n2 = float(values[1])
+    n3 = float(values[2])
+    n4 = float(values[3])
+    α1 = float(values[4])
+    α2 = float(values[5])
+    α3 = float(values[6])
+    α4 = float(values[7])
+    A = [α1, α2, α3, α4]
+    N = (n1 + n2 + n3 + n4) * 2
+    h = hi * N
+    stroka = []
+
+    # Нахождение меньшего коэффициента Пуассона
+    nu210 = nu120 * E20 / E10
+
+    # Первый этап: пересчет технических констант в тензорные
+    # Модуль упругости
+    E110 = E10 / (1 - nu120 * nu210)
+    E120 = E10 * nu210 / (1 - nu120 * nu210)
+    E220 = E20 / (1 - nu120 * nu210)
+    E660 = G120
+
+    # Коэффициент упругой податливости
+    S110 = 1 / E10
+    S220 = 1 / E20
+    S120 = -nu120 / E10
+    S660 = 1 / G120
+
+    # Третий этап: расчет упругих свойств всего пакета
+
+    E = np.array([[2 * (n1 * Ezz(A[0]) + n2 * Ezz(A[1]) + n3 * Ezz(A[2]) + n4 * Ezz(A[3])) / N,
+                   2 * (n1 * Ezθ(A[0]) + n2 * Ezθ(A[1]) + n3 * Ezθ(A[2]) + n4 * Ezθ(A[3])) / N],
+                  [2 * (n1 * Ezθ(A[0]) + n2 * Ezθ(A[1]) + n3 * Ezθ(A[2]) + n4 * Ezθ(A[3])) / N,
+                   2 * (n1 * Eθθ(A[0]) + n2 * Eθθ(A[1]) + n3 * Eθθ(A[2]) + n4 * Eθθ(A[3])) / N]])
+
+    delta = E[0, 0] * E[1, 1] - E[0, 1] ** 2
+
+    Szz_sum = E[1, 1] / delta
+    Sθθ_sum = E[0, 0] / delta
+    Szθ_sum = - E[0, 1] / delta
+
+    S = np.array([[Szz_sum, Szθ_sum],
+                  [Szθ_sum, Sθθ_sum]])
+
+    # Четвертый этап: вычисление средней деформации
+    σzz = p * R / (2 * h)
+    σθθ = p * R / h
+    σ = np.array([[σzz], [σθθ]])
+
+    ε = S.dot(σ)
+
+
+    # Пятый этап: расчет напряжений в каждом слое
+    def σα(x):
+        p21 = E0(x).dot(ε)
+        return p21
+
+
+    # Шестой этап: расчет напряжений вдоль волокон в каждом слое
+
+    def σ1(x):
+        p22 = (σα(x)[0, 0] + σα(x)[1, 0] + (σα(x)[0, 0] - σα(x)[1, 0]) * c(2 * x)) / 2
+        return p22
+
+
+    def σ2(x):
+        p23 = (σα(x)[0, 0] + σα(x)[1, 0] + (-σα(x)[0, 0] + σα(x)[1, 0]) * c(2 * x)) / 2
+        return p23
+
+
+    def tau12(x):
+        p24 = (-σα(x)[0, 0] + σα(x)[1, 0]) * c(x) * s(x)
+        return p24
+
+
+    def σθ11(x, y):
+        p55 = x * (math.tan(y)) ** 2 + σ45 * math.tan(y)
+        return p55
+
+
+    def σθ22(x, y):
+        p56 = x * (math.tan(y)) ** 2 - σ45 * math.tan(y)
+        return p56
+
+    # Напряжения в первой паре слоев
+    σ1α1 = σα(α1)[0, 0]
+    σ2α1 = σα(α1)[1, 0]
+    # Напряжения во второй паре слоев
+    σ1α2 = σα(α2)[0, 0]
+    σ2α2 = σα(α2)[1, 0]
+    # Напряжения в третьей паре слоев
+    σ1α3 = σα(α3)[0, 0]
+    σ2α3 = σα(α3)[1, 0]
+    # Напряжения в четвертой паре слоев
+    σ1α4 = σα(α4)[0, 0]
+    σ2α4 = σα(α4)[1, 0]
+
+    stroka.append(σ1α1)
+    stroka.append(σ2α1)
+    stroka.append(σ1α2)
+    stroka.append(σ2α2)
+    stroka.append(σ1α3)
+    stroka.append(σ2α3)
+    stroka.append(σ1α4)
+    stroka.append(σ2α4)
+    itog.append(stroka)
+
+    '''print(f'σ1α1 = {σ1α1},        σ2α1 = { σ2α1}')
+    print(σ1α2, σ2α2)
+    print(σ1α3, σ2α3)
+    print(σ1α4, σ2α4)'''
+
+    # Коэффициент запаса 1
+
+    tt1 = σ0 / (1 + math.tan(α1) ** 2) - σ45 * ((math.tan(α1)) ** 3) / (1 + math.tan(α1) ** 4)  # точка пересечения верхних прямых
+    tt2 = σ0 / (1 + math.tan(α1) ** 2) + σ45 * ((math.tan(α1)) ** 3) / (1 + math.tan(α1) ** 4)  # точка пересечения нижних прямых
+
+    t3 = float(σ2α1 / σ1α1)  # коэффициент наклона прямой OB/OA
+
+    t6 = σ0 / t3
+
+    if t3 > σθ11(tt1, α1) / tt1:
+        tt4 = σ45 * math.tan(α1) / (
+                    t3 - (math.tan(α1)) ** 2)  # точка пересечения продолжения прямой OB и верхней прямой
+    if t3 > σθ22(tt2, α1) / tt2 and t3 < σθ11(tt1, α1) / tt1:
+        tt4 = σ0 * (math.tan(α1) ** 4 + 1) / ((t3 * math.tan(α1) ** 2 + 1) * (
+                    math.tan(α1) ** 2 + 1))  # точка пересечения продолжения прямой OB и средней прямой
+    if t3 < σθ22(tt2, α1) / tt2:
+        tt4 = - σ45 * math.tan(α1) / (
+                    t3 - (math.tan(α1)) ** 2)  # точка пересечения продолжения прямой OB и нижней прямой
+
+    tt5 = tt4 * t3
+
+    OB1 = math.sqrt(σ1α1 ** 2 + σ2α1 ** 2)
+    OA1 = math.sqrt(tt4 ** 2 + tt5 ** 2)
+    OB190 = math.sqrt(σ1α1 ** 2 + σ2α1 ** 2)
+    OA190 = math.sqrt(t6 ** 2 + σ0 ** 2)
+    if OA1 > 0.001:
+        k1 = OA1 / OB1
+    else:
+        k1 = OA190 / OB190
+
+
+    # Коэффициент запаса 2
+
+    tt12 = σ0 / (1 + math.tan(α2) ** 2) - σ45 * ((math.tan(α2)) ** 3) / (1 + math.tan(α2) ** 4)  # точка пересечения верхних прямых
+    tt22 = σ0 / (1 + math.tan(α2) ** 2) + σ45 * ((math.tan(α2)) ** 3) / (1 + math.tan(α2) ** 4)  # точка пересечения нижних прямых
+
+    t32 = float(σ2α2 / σ1α2)  # коэффициент наклона прямой OB/OA
+
+    t62 = σ0 / t32
+
+    if t32 > σθ11(tt12, α2) / tt12:
+        tt42 = σ45 * math.tan(α2) / (
+                    t32 - (math.tan(α2)) ** 2)  # точка пересечения продолжения прямой OB и верхней прямой
+    if t32 > σθ22(tt22, α2) / tt22 and t32 < σθ11(tt12, α2) / tt12:
+        tt42 = σ0 * (math.tan(α2) ** 4 + 1) / ((t32 * math.tan(α2) ** 2 + 1) * (
+                    math.tan(α2) ** 2 + 1))  # точка пересечения продолжения прямой OB и средней прямой
+    if t32 < σθ22(tt22, α2) / tt22:
+        tt42 = - σ45 * math.tan(α2) / (
+                    t32 - (math.tan(α2)) ** 2)  # точка пересечения продолжения прямой OB и нижней прямой
+
+    tt52 = tt42 * t32
+
+    OB2 = math.sqrt(σ1α2 ** 2 + σ2α2 ** 2)
+    OA2 = math.sqrt(tt42 ** 2 + tt52 ** 2)
+    OB290 = math.sqrt(σ1α2 ** 2 + σ2α2 ** 2)
+    OA290 = math.sqrt(t62 ** 2 + σ0 ** 2)
+    if OA2 > 0.001:
+        k2 = OA2 / OB2
+    else:
+        k2 = OA290 / OB290
+
+    # Коэффициент запаса 3
+
+    tt13 = σ0 / (1 + math.tan(α3) ** 2) - σ45 * ((math.tan(α3)) ** 3) / (1 + math.tan(α3) ** 4)  # точка пересечения верхних прямых
+    tt23 = σ0 / (1 + math.tan(α3) ** 2) + σ45 * ((math.tan(α3)) ** 3) / (1 + math.tan(α3) ** 4)  # точка пересечения нижних прямых
+
+    t33 = float(σ2α3 / σ1α3)  # коэффициент наклона прямой OB/OA
+
+    t63 = σ0 / t33
+
+    if t33 > σθ11(tt13, α3) / tt13:
+        tt43 = σ45 * math.tan(α3) / (
+                    t33 - (math.tan(α3)) ** 2)  # точка пересечения продолжения прямой OB и верхней прямой
+    if t33 > σθ22(tt23, α3) / tt23 and t33 < σθ11(tt13, α3) / tt13:
+        tt43 = σ0 * (math.tan(α3) ** 4 + 1) / ((t33 * math.tan(α3) ** 2 + 1) * (
+                    math.tan(α3) ** 2 + 1))  # точка пересечения продолжения прямой OB и средней прямой
+    if t33 < σθ22(tt23, α3) / tt23:
+        tt43 = - σ45 * math.tan(α3) / (
+                    t33 - (math.tan(α3)) ** 2)  # точка пересечения продолжения прямой OB и нижней прямой
+
+    tt53 = tt43 * t33
+
+    OB3 = math.sqrt(σ1α3 ** 2 + σ2α3 ** 2)
+    OA3 = math.sqrt(tt43 ** 2 + tt53 ** 2)
+    OB390 = math.sqrt(σ1α3 ** 2 + σ2α3 ** 2)
+    OA390 = math.sqrt(t63 ** 2 + σ0 ** 2)
+    if OA3 > 0.001:
+        k3 = OA3 / OB3
+    else:
+        k3 = OA390 / OB390
+
+    # Коэффициент запаса 4
+
+    tt14 = σ0 / (1 + math.tan(α4) ** 2) - σ45 * ((math.tan(α4)) ** 3) / (1 + math.tan(α4) ** 4)  # точка пересечения верхних прямых
+    tt24 = σ0 / (1 + math.tan(α4) ** 2) + σ45 * ((math.tan(α4)) ** 3) / (1 + math.tan(α4) ** 4)  # точка пересечения нижних прямых
+
+    t34 = float(σ2α4 / σ1α4)  # коэффициент наклона прямой OB/OA
+
+    t64 = σ0 / t34
+
+    if t34 > σθ11(tt14, α4) / tt14:
+        tt44 = σ45 * math.tan(α4) / (
+                    t34 - (math.tan(α4)) ** 2)  # точка пересечения продолжения прямой OB и верхней прямой
+    if t34 > σθ22(tt24, α4) / tt24 and t34 < σθ11(tt14, α4) / tt14:
+        tt44 = σ0 * (math.tan(α4) ** 4 + 1) / ((t34 * math.tan(α4) ** 2 + 1) * (
+                    math.tan(α4) ** 2 + 1))  # точка пересечения продолжения прямой OB и средней прямой
+    if t34 < σθ22(tt24, α4) / tt24:
+        tt44 = - σ45 * math.tan(α4) / (
+                    t34 - (math.tan(α4)) ** 2)  # точка пересечения продолжения прямой OB и нижней прямой
+
+    tt54 = tt44 * t34
+
+    OB4 = math.sqrt(σ1α4 ** 2 + σ2α4 ** 2)
+    OA4 = math.sqrt(tt44 ** 2 + tt54 ** 2)
+    OB490 = math.sqrt(σ1α4 ** 2 + σ2α4 ** 2)
+    OA490 = math.sqrt(t64 ** 2 + σ0 ** 2)
+    if OA4 > 0.001:
+        k4 = OA4 / OB4
+    else:
+        k4 = OA490 / OB490
+
+    K = []
+    k = min(k1, k2, k3, k4)
+    K.append(k)
+    KK.append(K) # Список минимальных запасов в каждом из вариантов
+
+
+
+m = max(KK) # Максимальный запас из вариантов
+I = KK.index(m) # Номер варианта с максимальным запасом
+# print(itog[I])
+print(m)
+print(res[I][0])
+print(res[I][1])
+print(res[I][2])
+print(res[I][3])
+print(180 * res[I][4] / Pi)
+print(180 * res[I][5] / Pi)
+print(180 * res[I][6] / Pi)
+print(180 * res[I][7] / Pi)
+#print(KK)
+#print(I)
+
+end = time.time() - start ## собственно время работы программы
+
+print(end)
+
+
